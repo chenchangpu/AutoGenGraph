@@ -31,5 +31,5 @@
 生成rmat图文件命名为rmat_v8_d4_c2.txt，随机种子设置为0，
 划分时的超参数r设置为2，则执行gen_data.sh脚本命令为：
     ```
-    ./gen_data.sh 8 4 rmat_v8_d4_c2 0 0 2 2 data/v8_d4_c2
+    ./gen_data.sh 8 4 rmat_v8_d4_c2.txt 0 0 2 2 data/v8_d4_c2
     ```
