@@ -44,5 +44,5 @@
     ```
 
 ## 注意事项
-- 生成的rmat图经过边的去重后，实际边数可能更少
-- 生成的neib_table数据去除了src与dst相等的neib，所以实际neib对数可能更少
+- 生成的rmat图经过了边的去重，且将无向边处理成了有向边，实际边数可能更少
+- 生成的neib_table文件去除了start_offset与end_offset相等的neib，所以实际neib对数可能更少
