@@ -1,5 +1,14 @@
 # AutoGenGraph rmat分支使用
 
+## 作用
+根据参数生成rmat标准图，并转换为FPGA能处理的格式
+
+## 使用要求
+* Linux (Ubuntu)
+* C++ (GCC) >= 9.5.0
+* CMake     >= 3.17
+* OpenMP    >= 4.5
+
 ## 用法
 
 ```
@@ -33,3 +42,7 @@
     ```
     ./gen_data.sh 8 4 rmat_v8_d4_c2.txt 0 0 2 2 data/v8_d4_c2
     ```
+
+## 注意事项
+- 生成的rmat图经过边的去重后，实际边数可能更少
+- 生成的neib_table数据去除了src与dst相等的neib，所以实际neib对数可能更少
