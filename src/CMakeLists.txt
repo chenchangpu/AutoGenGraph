@@ -1,0 +1,5 @@
+add_executable(graph_converter graph_converter.cpp)
+add_executable(txt2binary txt2binary.cpp)
+add_executable(unique_edges unique_edges.cpp)
+add_executable(split_neib split_neib.cpp)
+add_executable(gen_meta_partition gen_meta_partition.cpp)
