@@ -1,39 +1,51 @@
 #!/bin/bash
 
 # 检查参数数量
-if [ $# -ne 4 ]; then
-    echo "用法: $0 base_path i c r"
-    echo "  base_path: 输入/输出目录路径"
-    echo "  i: 输入图像文件名"
-    echo "  c: neib划分个数"
-    echo "  r: neib划分超参(一般等于2或3)"
-
+if [ $# -ne 8 ]; then
+    echo "用法: $0 v d o seed1 seed2 p r base_path"
+    echo "  v: 顶点数量参数"
+    echo "  d: 度数参数"
+    echo "  o: 输出文件名"
+    echo "  seed1: 随机种子1"
+    echo "  seed2: 随机种子2"
+    echo "  p: neib划分个数"
+    echo "  r: neib划分超参"
+    echo "  base_path: 输出目录路径"
     exit 1
 fi
 
 # 获取参数
-base_path=$1
-# o = i, 给定输入图
-o=$2  
-# p = c, neib划分个数   
-p=$3
-r=$4 
-
+v=$1
+d=$2
+o=$3
+seed1=$4
+seed2=$5
+p=$6
+r=$7 
+base_path=$8
 
 # 检查输出目录是否存在，若不存在则创建
-if [ -f "$base_path/$o" ]; then
-    echo "图文件存在：$base_path/$o"
+if [ ! -d "$base_path" ]; then
+    echo "输出目录 $base_path 不存在，正在创建..."
+    mkdir -p "$base_path"
 else
-    echo "文件不存在：$base_path/$o"
+    echo "输出目录 $base_path 已存在"
+fi
+
+echo "开始生成图数据..."
+
+
+# 步骤1: 生成边
+echo "步骤1: 生成边..."
+build/third_party/GFLabs/gen_edges -v $v -d $d -o "$base_path/$o" --seed1 $seed1 --seed2 $seed2
+if [ $? -ne 0 ]; then
+    echo "生成边失败！"
     exit 1
 fi
 
-echo "开始转换图数据..."
 
-o_no_ext="${o%.txt}"
-
-# 步骤1: 去除重复边
-echo "步骤1: 去除重复边..."
+# 步骤2: 去除重复边
+echo "步骤2: 去除重复边..."
 # 创建临时文件
 temp_file="$base_path/temp_$o"
 cp "$base_path/$o" "$temp_file"
@@ -45,11 +57,11 @@ fi
 rm "$temp_file"  # 删除临时文件
 
 
-# 步骤2: 转换图格式
-echo "步骤2: 转换图格式..."
+# 步骤3: 转换图格式
+echo "步骤3: 转换图格式..."
 # 构建输出文件名
-edge_table="$base_path/edge_table_${o_no_ext}_c${p}.txt"
-neib_table="$base_path/neib_table_${o_no_ext}_c${p}.txt"
+edge_table="$base_path/edge_table_v${v}_d${d}_c${p}.txt"
+neib_table="$base_path/neib_table_v${v}_d${d}_c${p}.txt"
 build/src/graph_converter "$base_path/$o" "$edge_table" "$neib_table"
 if [ $? -ne 0 ]; then
     echo "转换图格式失败！"
@@ -57,10 +69,10 @@ if [ $? -ne 0 ]; then
 fi
 
 
-# 步骤3：生成划分元数据文件
-echo "步骤3: 生成划分元数据文件..."
+# 步骤4：生成划分元数据文件
+echo "步骤4: 生成划分元数据文件..."
 # 构建输出文件
-temp_rmat_part="$base_path/temp_${o_no_ext}_c${p}_r${r}_part.txt"
+temp_rmat_part="$base_path/temp_rmat_v${v}_d${d}_p${p}_r${r}_part.txt"
 build/third_party/GFLabs/gen_partitions_2 -i "$base_path/$o" -o "$temp_rmat_part" -p $p -r $r 
 # 获取neib的行数
 neib_lines=$(wc -l < "$neib_table")
@@ -78,18 +90,18 @@ if [ "$last_element" -gt "$neib_lines" ]; then
     mv "$temp_fixed_file" "$temp_rmat_part"
     echo "分区元数据已修正"
 fi
-rmat_part="$base_path/${o_no_ext}_c${p}_r${r}_part.txt"
+rmat_part="$base_path/rmat_v${v}_d${d}_p${p}_r${r}_part.txt"
 build/src/gen_meta_partition $p "$temp_rmat_part" "$rmat_part"
 
 
-# 步骤4：划分数据
-echo "步骤4: 划分数据..."
-build/src/split_neib "$base_path" "neib_table_${o_no_ext}_c${p}.txt" "temp_${o_no_ext}_c${p}_r${r}_part.txt"
+# 步骤5：划分数据
+echo "步骤5: 划分数据..."
+build/src/split_neib "$base_path" "neib_table_v${v}_d${d}_c${p}.txt" "temp_rmat_v${v}_d${d}_p${p}_r${r}_part.txt"
 
 
-# 步骤5: 生成元数据文件
-echo "步骤5: 生成元数据文件..."
-meta_file="$base_path/graph_meta_${o_no_ext}_c${p}.txt"
+# 步骤6: 生成元数据文件
+echo "步骤6: 生成元数据文件..."
+meta_file="$base_path/graph_meta_v${v}_d${d}_c${p}.txt"
 # 计算行数并写入元数据文件
 edge_lines=$(wc -l < "$edge_table")
 echo "$edge_lines" > "$meta_file"
@@ -98,8 +110,8 @@ cat "$rmat_part" >> "$meta_file"
 echo "元数据文件已生成: $meta_file (包含边数和neib分区信息)"
 
 
-# 步骤6: 转换为二进制格式
-echo "步骤6: 转换为二进制格式..."
+# 步骤7: 转换为二进制格式
+echo "步骤7: 转换为二进制格式..."
 # 转换边表文件
 edge_table_base="${edge_table%.txt}"
 echo "转换边表文件: $edge_table_base.txt"
@@ -112,7 +124,7 @@ build/src/txt2binary "$meta_file_base"
 # 转换分区邻居表文件
 echo "转换分区邻居表文件..."
 for ((i=1; i<=$p; i++)); do
-    part_neib_file="$base_path/neib_table_${o_no_ext}_c${p}_${i}"
+    part_neib_file="$base_path/neib_table_v${v}_d${d}_c${p}_${i}"
     if [ -f "${part_neib_file}.txt" ]; then
         echo "转换: ${part_neib_file}.txt"
         build/src/txt2binary "$part_neib_file"
