@@ -41,7 +41,7 @@
 假设我们有一个原始图文件 **Amazon0302_origin.txt**，需要将neib划分为4份：
 
 1. 首先处理为标准图文件格式，命名为 **Amazon0302.txt**
-2. 将标准图文件放在 `data/Amazon0302_c4` 目录下
+2. 将标准图文件 **Amazon0302.txt** 放在 `data/Amazon0302_c4` 目录下
 3. 执行命令：
     ```
     ./gen_data.sh data/Amazon0302_c4 Amazon0302.txt 4 2
