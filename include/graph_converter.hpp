@@ -1,6 +1,5 @@
-/*
-v3相比v2，去掉无意义neib对，注意需要修改partition
-*/
+#ifndef __GRAPH_CONVERTER__
+#define __GRAPH_CONVERTER__
 
 #include <iostream>
 #include <fstream>
@@ -10,22 +9,32 @@ v3相比v2，去掉无意义neib对，注意需要修改partition
 #include <unordered_map>
 #include <algorithm>
 
-// 定义边的结构
+// 定义edge结构
 struct Edge {
     int src, dst;
     Edge(int s, int d) : src(s), dst(d) {}
 };
 
+// 定义neib结构
+struct Neib{
+    int src_start;
+    int src_end;
+    int dst_start;
+    int dst_end;
+};
+
+
 // 定义图的类
 class Graph {
-private:
+public:
     int num_vertices;
     int num_edges;
-    std::vector<Edge> edges;
+    std::vector<Edge> edges;                // rmat的edge对
     std::vector<std::vector<int>> adj_list; // 邻接表
+    std::vector<int> edge_table;
+    std::vector<Neib> neib_table;
 
-public:
-    // 从文件读取图数据
+    // 从文件读取rmat图数据
     bool readFromFile(const std::string& filename) {
         std::ifstream file(filename);
         if (!file.is_open()) {
@@ -40,12 +49,14 @@ public:
         adj_list.resize(num_vertices);
 
         // 读取边
-        for(int i=0;i<num_edges;i++){
+        for(int i=0; i<num_edges; i++){
             int src, dst;
-            file >> src >> dst;                 // 注意rmat已经去重，所以 src < dst
+            file >> src >> dst;                 
+            if(src >= dst) continue;                    // 假设已经去重 src < dst
             edges.emplace_back(src, dst);
-            adj_list[src].push_back(dst);
+            adj_list[src].emplace_back(dst);
         }
+        num_edges = edges.size();                       // 去重后的边数
 
         // 对每个顶点的邻接表排序
         for (auto& neighbors : adj_list) {
@@ -57,32 +68,19 @@ public:
     }
 
     // 生成边表
-    bool generateEdgeTable(const std::string& filename) {
-        std::ofstream file(filename);
-        if (!file.is_open()) {
-            std::cerr << "无法创建文件: " << filename << std::endl;
-            return false;
-        }
-
-        // 写入边表
+    bool generateEdgeTable() {
+        // 写入edge_table
         for (int v = 0; v < num_vertices; v++) {
-            for (int neighbor : adj_list[v]) {
-                file << neighbor << std::endl;
+            if(!adj_list[v].empty()){
+                edge_table.insert(edge_table.end(), adj_list[v].begin(), adj_list[v].end());
             }
         }
 
-        file.close();
         return true;
     }
 
     // 生成邻接顶点对表
-    bool generateNeibTable(const std::string& filename) {
-        std::ofstream file(filename);
-        if (!file.is_open()) {
-            std::cerr << "无法创建文件: " << filename << std::endl;
-            return false;
-        }
-
+    bool generateNeibTable() {
         // 计算每个顶点在边表中的起始位置
         std::vector<int> vertex_offset(num_vertices + 1, 0);
         for (int i = 0; i < num_vertices; i++) {
@@ -107,37 +105,11 @@ public:
                 continue;
             }
 
-            // 写入一行邻接顶点对的offset
-            file << src_start << " " << src_end << " " 
-                 << dst_start << " " << dst_end << std::endl;  //dahu: 
+            neib_table.emplace_back(Neib{src_start, src_end, dst_start, dst_end});
         }
 
-        file.close();
         return true;
     }
 };
 
-
-int main(int argc, char ** argv) {
-    if(argc != 4){
-        std::cout << "Usage: " << argv[0] << "input_rmat_file.txt" << "output_edge_table.txt" 
-                    << "output_neib_table.txt" << std::endl;
-    }
-
-    Graph graph;
-
-    if (!graph.readFromFile(argv[1])) {
-        return 1;
-    }
-
-    if (!graph.generateEdgeTable(argv[2])) {
-        return 1;
-    }
-
-    if (!graph.generateNeibTable(argv[3])) {
-        return 1;
-    }
-
-    std::cout << "数据结构转换完成！" << std::endl;
-    return 0;
-}
+#endif

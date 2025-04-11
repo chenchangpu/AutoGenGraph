@@ -1,4 +1,4 @@
-# AutoGenGraph 使用方法
+# AutoGenGraph quick_master分支使用方法
 
 ## 作用
 将标准格式的图数据（见步骤一中说明）转换为FPGA能处理的格式
@@ -12,44 +12,17 @@
 ## 用法
 
 ```
-./gen_data.sh base_path i c r
+./quick_gen_data <base_path_in> <rmat_file> <partition_num> <partition_rate> <base_path_out>
 ```
 
 ### 参数说明：
-- **base_path**: 输出目录路径
-- **i**: 输入标准图文件名称
-- **c**: neib的划分个数，一般为1、2或4，根据FPGA kernel的情况而定
-- **r**: neib划分的超参数，一般为2或3
-
-## 使用步骤
-
-### 步骤一：准备标准化的图文件
-1. 将原始图文件处理为标准格式（第一行为两个整数m和n，表示节点数和边数，节点编号为0~m-1，之后n行每行两个整数，表示一条边的src和dst）
-2. 将处理后的标准图文件放入指定目录
-
-### 步骤二：运行生成脚本
-执行gen_data.sh脚本，生成所需的数据文件和元数据
-
-## 文件说明
-
-- **edge_table**: 边表文件
-- **neib_table**: 邻居表文件
-- **meta_file**: 元数据文件
+- **base_path_in**: 输入base目录
+- **rmat_file**: 输入标准图文件名称
+- **partition_num**: neib的划分个数，一般为1、2或4，根据FPGA kernel的情况而定
+- **partition_rate**: neib划分的超参数，一般为2或3
+- **base_path_out**: 输出base目录
 
 ## 示例
 
-假设我们有一个原始图文件 **Amazon0302_origin.txt**，需要将neib划分为4份：
+./quick_gen_data ../data/v18_d16_c4/ v18_d16_c4.txt 4 2 ../data/v18_d16_c4
 
-1. 首先处理为标准图文件格式，命名为 **Amazon0302.txt**
-2. 将标准图文件 **Amazon0302.txt** 放在 `data/Amazon0302_c4` 目录下
-3. 执行命令：
-    ```
-    ./gen_data.sh data/Amazon0302_c4 Amazon0302.txt 4 2
-    ```
-4. 脚本将生成所需的边表、邻居表和元数据文件
-
-## 注意事项
-- 原始图文件处理为标准格式后，原文件可以删除
-- 原始图文件中所有边都视为无向边，比如"0 1"和"1 0"都视为顶点0和1有一条无向边
-- 标准图数据经过了边的去重，且无向边用有向边表示（"0 1"和"1 0"只保留"0 1"），所以实际边数可能更少
-- 生成的neib_table文件去除了start_offset与end_offset相等的neib，所以实际neib对数可能更少
