@@ -16,7 +16,7 @@ int main(int argc, char **argv){
         std::cout << "Usage: " << argv[0] << "base_path_in" << "rmat_file" << "partition_num" << "partition_rate" << "base_path_out" << std::endl;
     }
     // argv[1] = "../data/v18_d16_c4/";
-    // argv[2] = "v18_d16_c4.txt";
+    // argv[2] = "v18_d16_c4.bin";
     // argv[3] = "4";
     // argv[4] = "2";
     // argv[5] = "../data/v18_d16_c4/";
@@ -30,25 +30,47 @@ int main(int argc, char **argv){
     std::string base_path_out = argv[5];
 
     Graph g;
-    if(!g.readFromFile(rmat_path)){
-        std::cout << "读取rmat文件失败！" << std::endl;
+    std::string suffix = (rmat_file.size() >= 4) ? rmat_file.substr(rmat_file.size() - 4) : "";
+    std::cout << "读取rmat文件..." << std::endl;
+    if(suffix == ".txt"){
+        if(!g.readFromTxtFile(rmat_path)){
+            std::cout << "读取rmat文件失败！" << std::endl;
+            return 1;
+        }
+    }
+    else if(suffix == ".bin"){
+        if(!g.readFromBinFile(rmat_path)){
+            std::cout << "读取rmat文件失败！" << std::endl;
+            return 1;
+        }
+    }
+    else{
+        std::cout << "rmat文件格式不支持！" << std::endl;
+        return 1;
     }
 
+    std::cout << "转换edge_table..." << std::endl;
     if(!g.generateEdgeTable()){
         std::cout << "转换edge_table失败！" << std::endl;
+        return 1;
     }
 
+    std::cout << "转换neib_table..." << std::endl;
     if(!g.generateNeibTable()){
         std::cout << "转换neib_table失败！" << std::endl;
+        return 1;
     }
 
     std::vector<int> p;
+    std::cout << "划分neib_table..." << std::endl;
     if(!gen_partiotions(g, p, partition_num, partition_rate)){
         std::cout << "划分neib_table失败！" << std::endl;
+        return 1;
     }
 
     // 输出bin
     // meta_graph
+    std::cout << "输出bin文件" << std::endl;
     std::string graph_meta_file = "graph_meta_" + remove_any_suffix(rmat_file) + ".bin";
     std::string graph_meta_path = base_path_out + '/' + graph_meta_file;
 

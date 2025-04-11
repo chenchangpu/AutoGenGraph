@@ -12,7 +12,6 @@
 // 定义edge结构
 struct Edge {
     int src, dst;
-    Edge(int s, int d) : src(s), dst(d) {}
 };
 
 // 定义neib结构
@@ -35,7 +34,7 @@ public:
     std::vector<Neib> neib_table;
 
     // 从文件读取rmat图数据
-    bool readFromFile(const std::string& filename) {
+    bool readFromTxtFile(const std::string& filename) {
         std::ifstream file(filename);
         if (!file.is_open()) {
             std::cerr << "无法打开文件: " << filename << std::endl;
@@ -53,10 +52,43 @@ public:
             int src, dst;
             file >> src >> dst;                 
             if(src >= dst) continue;                    // 假设已经去重 src < dst
-            edges.emplace_back(src, dst);
+            edges.emplace_back(Edge{src, dst});
             adj_list[src].emplace_back(dst);
         }
         num_edges = edges.size();                       // 去重后的边数
+
+        // 对每个顶点的邻接表排序
+        for (auto& neighbors : adj_list) {
+            std::sort(neighbors.begin(), neighbors.end());
+        }
+
+        file.close();
+        return true;
+    }
+
+    bool readFromBinFile(const std::string& filename) {
+        std::ifstream file(filename, std::ios::binary);
+        if (!file.is_open()) {
+            std::cerr << "无法打开文件: " << filename << std::endl;
+            return false;
+        }
+
+        // 读取顶点数和边数
+        file.read(reinterpret_cast<char*>(&num_vertices), sizeof(int));
+        file.read(reinterpret_cast<char*>(&num_edges), sizeof(int));
+
+        edges.resize(num_edges);
+        file.read(reinterpret_cast<char*>(edges.data()), num_edges * sizeof(Edge));   // bin文件已经去重，直接读入
+
+        // 初始化邻接表
+        adj_list.resize(num_vertices);
+
+        // 读取边
+        for(auto e: edges){
+            int src = e.src, dst = e.dst;
+            if(src >= dst) continue;  // src < dst
+            adj_list[src].emplace_back(dst);
+        }
 
         // 对每个顶点的邻接表排序
         for (auto& neighbors : adj_list) {
