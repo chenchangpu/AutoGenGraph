@@ -91,9 +91,9 @@ public:
         }
 
         // 对每个顶点的邻接表排序
-        for (auto& neighbors : adj_list) {
-            std::sort(neighbors.begin(), neighbors.end());
-        }
+        // for (auto& neighbors : adj_list) {
+        //     std::sort(neighbors.begin(), neighbors.end());                             // dahu: sort
+        // }
 
         file.close();
         return true;

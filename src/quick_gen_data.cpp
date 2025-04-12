@@ -1,3 +1,4 @@
+#include <chrono>
 #include "graph_converter.hpp"
 #include "gen_partitions.hpp"
 
@@ -30,6 +31,8 @@ int main(int argc, char **argv){
     std::string base_path_out = argv[5];
 
     Graph g;
+
+    auto start = std::chrono::high_resolution_clock::now();             // 记录开始时间
     std::string suffix = (rmat_file.size() >= 4) ? rmat_file.substr(rmat_file.size() - 4) : "";
     std::cout << "读取rmat文件..." << std::endl;
     if(suffix == ".txt"){
@@ -109,6 +112,11 @@ int main(int argc, char **argv){
         neib_table.write(reinterpret_cast<const char*>(g.neib_table.data() + idx), p[i] * sizeof(Neib)); ///////////////////
         idx += p[i];
     }
+
+    auto end = std::chrono::high_resolution_clock::now();               // 记录结束时间
+    std::chrono::duration<double, std::milli> elapsed = end - start;    // 单位为毫秒
+
+    std::cout << "数据处理耗时: " << elapsed.count() << " ms" << std::endl;
 
     return 0;
 }

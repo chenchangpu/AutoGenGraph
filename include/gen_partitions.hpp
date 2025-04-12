@@ -10,6 +10,21 @@
 #include <limits>
 #include "graph_converter.hpp"
 
+
+std::vector<int64_t> make_row_offsets(const std::vector<Edge>& edges, int64_t n) {
+    std::vector<int64_t> row_offset(n + 1, 0);
+    
+    for(const auto& edge : edges) {
+        row_offset[edge.src + 1]++;
+    }
+    
+    for(int i = 1; i <= n; i++) {
+        row_offset[i] += row_offset[i-1];
+    }
+    
+    return row_offset;
+}
+
 struct Partition {
     int64_t target_cost_per_processor;
     int64_t max_cost_per_processor;
@@ -87,10 +102,7 @@ bool gen_partiotions(const Graph &g, std::vector<int> &p, int num_processors, in
         p.clear();
     }
 
-    std::vector<int64_t> row_offset(g.num_vertices + 1, 0);
-    for(int i = 1; i <= g.num_vertices; ++i) {
-        row_offset[i] += row_offset[i-1] + g.adj_list[i].size();
-    }
+    std::vector<int64_t> row_offset = make_row_offsets(g.edges, g.num_vertices);
 
     Partition partitons = make_partitions(g.edges, row_offset, num_processors, rate);
 

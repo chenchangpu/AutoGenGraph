@@ -1,7 +1,7 @@
-# AutoGenGraph quick_master分支使用方法
+# AutoGenGraph master-quick分支使用方法
 
 ## 作用
-将标准格式的图数据（见步骤一中说明）转换为FPGA能处理的格式
+将标准格式（且已经去重）的图数据转换为FPGA能处理的格式
 
 ## 使用要求
 * Linux (Ubuntu)
