@@ -40,14 +40,12 @@ int main(int argc, char **argv){
             std::cout << "读取rmat文件失败！" << std::endl;
             return 1;
         }
-    }
-    else if(suffix == ".bin"){
+    } else if(suffix == ".bin"){
         if(!g.readFromBinFile(rmat_path)){
             std::cout << "读取rmat文件失败！" << std::endl;
             return 1;
         }
-    }
-    else{
+    } else{
         std::cout << "rmat文件格式不支持！" << std::endl;
         return 1;
     }
