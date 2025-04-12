@@ -37,7 +37,7 @@ public:
     bool readFromTxtFile(const std::string& filename) {
         std::ifstream file(filename);
         if (!file.is_open()) {
-            std::cerr << "无法打开文件: " << filename << std::endl;
+            std::cerr << "Can not open file: " << filename << std::endl;
             return false;
         }
 
@@ -69,7 +69,7 @@ public:
     bool readFromBinFile(const std::string& filename) {
         std::ifstream file(filename, std::ios::binary);
         if (!file.is_open()) {
-            std::cerr << "无法打开文件: " << filename << std::endl;
+            std::cerr << "Can not open file: " << filename << std::endl;
             return false;
         }
 

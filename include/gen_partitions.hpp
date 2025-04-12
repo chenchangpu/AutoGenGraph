@@ -118,7 +118,7 @@ bool gen_partiotions(const Graph &g, std::vector<int> &p, int num_processors, in
 
     for(int i = 1; i <= num_processors; ++i){
         if(tmp_p[i] - tmp_p[i-1] < 0){
-            std::cout << "neib划分子集小于0，不符合要求！" << std::endl;
+            std::cout << "size of neib_table subset < 0, error! " << std::endl;
             return false;
         }
         p.emplace_back(tmp_p[i] - tmp_p[i-1]);

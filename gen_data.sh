@@ -1,20 +1,20 @@
 #!/bin/bash
 
-# 检查参数数量
+# Check parameter count
 if [ $# -ne 8 ]; then
-    echo "用法: $0 v d o seed1 seed2 p r base_path"
-    echo "  v: 顶点数量参数"
-    echo "  d: 度数参数"
-    echo "  o: 输出文件名"
-    echo "  seed1: 随机种子1"
-    echo "  seed2: 随机种子2"
-    echo "  p: neib划分个数"
-    echo "  r: neib划分超参"
-    echo "  base_path: 输出目录路径"
+    echo "Usage: $0 v d o seed1 seed2 p r base_path"
+    echo "  v: Vertex count parameter"
+    echo "  d: Degree parameter"
+    echo "  o: Output filename"
+    echo "  seed1: Random seed 1"
+    echo "  seed2: Random seed 2"
+    echo "  p: Number of neib partitions"
+    echo "  r: Neib partition hyperparameter"
+    echo "  base_path: Output directory path"
     exit 1
 fi
 
-# 获取参数
+# Get parameters
 v=$1
 d=$2
 o=$3
@@ -24,29 +24,29 @@ p=$6
 r=$7 
 base_path=$8
 
-# 检查输出目录是否存在，若不存在则创建
+# Check if output directory exists, create if not
 if [ ! -d "$base_path" ]; then
-    echo "输出目录 $base_path 不存在，正在创建..."
+    echo "Output directory $base_path does not exist, creating..."
     mkdir -p "$base_path"
 else
-    echo "输出目录 $base_path 已存在"
+    echo "Output directory $base_path already exists"
 fi
 
-echo "开始生成图数据..."
+echo "Starting graph data generation..."
 
 
-# 步骤1: 生成图
-echo "步骤1: 生成边..."
+# Step 1: Generate graph
+echo "Step 1: Generating edges..."
 build/third_party/GFLabs/gen_edges -v $v -d $d -o "$base_path/$o" -u --seed1 $seed1 --seed2 $seed2
 if [ $? -ne 0 ]; then
-    echo "生成边失败！"
+    echo "Failed to generate edges!"
     exit 1
 fi
 
-# 步骤2: 转换图
-echo "步骤2: 转换图..."
+# Step 2: Convert graph
+echo "Step 2: Converting graph format..."
 build/quick_gen_data "$base_path" "$o" $p $r "$base_path"
 if [ $? -ne 0 ]; then
-    echo "转换图失败！"
+    echo "Failed to convert graph format!"
     exit 1
 fi

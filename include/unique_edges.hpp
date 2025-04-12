@@ -15,7 +15,7 @@
 void unique_edges(std::string infile_path, std::string outfile_path){
     std::ifstream infile(infile_path, std::ios::in);
     if(!infile){
-        std::cout << "无法打开输入文件：" << infile_path << std::endl;
+        std::cout << "Can not open file: " << infile_path << std::endl;
         exit(1);  // 添加退出
     }
 
@@ -41,13 +41,13 @@ void unique_edges(std::string infile_path, std::string outfile_path){
     // 然后再写入
     std::ofstream outfile(outfile_path, std::ios::out);
     if(!outfile){
-        std::cout << "无法打开输出文件：" << outfile_path << std::endl;
+        std::cout << "Can not open file: " << outfile_path << std::endl;
         exit(1);  // 添加退出
     }
 
     int cnt = ues.size();
-    printf("自环数量：%d\n", self_loop);
-    printf("重边数量：%d\n", num_e - cnt - self_loop);
+    printf("self loops: %d\n", self_loop);
+    printf("duplicated edges: %d\n", num_e - cnt - self_loop);
 
     outfile << num_v << " " << cnt << std::endl;
     for(auto e: ues){
